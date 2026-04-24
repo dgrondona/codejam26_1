@@ -1,84 +1,152 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Joel</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <title>Pop-Up Banner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style type="text/css">
-    html,
-    body {
-      background: transparent;
-      margin: 0;
-      padding: 0;
-      font-family: sans-serif;
-    }
+    <style>
+        html, body {
+            background: transparent;
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+        }
 
-    #overlay-container {
-      width: 960px;
-      height: 540px;
-    }
+        :root {
+            --banner-h: 60px;
+        }
 
-    /* Your style here... (feel free to remove this example styling) */
-    #skip {
-      display: none; /* Hidden until ad starts */
-      position: absolute;
-      bottom: 60px;
-      right: 0;
-      padding: 10px 18px;
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid black;
-      border-right-width: 0;
-      font-size: 1.2rem;
-      border-radius: 4px 0 0 4px;
-      color: white;
-      cursor: pointer;
-    }
-  </style>
+        #overlay-container {
+            width: 960px;
+            height: 540px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        #banner {
+            position: absolute;
+            top: calc(-1 * var(--banner-h));
+            width: 100%;
+            height: var(--banner-h);
+            
+            justify-content: space-between;
+            
+            background: rgba(255, 255, 255, 0.95);
+            color: black;
+            
+            display: flex;
+            align-items: center;
+            
+            padding: 0 6px;
+            box-sizing: border-box;
+            
+            font-size: 12px;
+            z-index: 20;
+            
+            transition: top 0.15s ease;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+        }
+
+        #banner.active {
+            top: 0;
+        }
+
+        #banner button {
+            font-size: 11px;
+            padding: 2px 4px;
+            cursor: pointer;
+        }
+
+        #close-x {
+            position: absolute;
+            right: 4px;
+            top: 4px;
+            width: 4px;
+            height: 4px;
+            background: transparent;
+            color: white;
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            z-index: 30;
+            margin-right: 5px;
+            margin-top: 3px;
+            transition: transform 0.15s ease;
+        }
+
+        #overlay-container.shifted #close-x {
+            transform: translateY(var(--banner-h));
+        }
+    </style>
 </head>
 
 <body>
-  <div id="overlay-container">
-    <!-- We've added a sample button. Feel free to remove it: -->
-    <button id="skip">
-      Skip Ad...
-    </button>
-  </div>
+    <div id="overlay-container">
 
-  <script type="text/javascript">
-    (function(window, document){
-      // This is how you tell the parent window that the ad was successfully skipped.
-      function adSuccess() {
-        window.top.postMessage({ type: 'success' }, '*');
-      }
+        <div id="banner">
 
-      const skipButton = document.getElementById('skip');
+            <div class="banner-left">
+                System Notification:  
+            </div>
 
-      // Listen for messages from the game shell
-      window.addEventListener('message', (event) => {
-        if (!event.data || !event.data.type) return;
+            <div class="banner-right">
+                <button id="visit-btn">Visit Website</button>
+            </div>
 
-        if (event.data.type === 'adStarted') {
-          // Show the skip button when the ad starts
-          skipButton.style.display = 'block';
+        </div>
+
+        <div id="close-x">✕</div>
+
+    </div>
+
+    <script>
+        
+        (function(window, document){
+
+        function adSuccess() {
+            window.top.postMessage({ type: 'success' }, '*');
         }
 
-        // By default, if the user doesn't "skip" the ad before the video ends,
-        // we call fail to restart. You're welcome to replace this with a survey
-        // or other interaction instead (see examples/survey).
-        if (event.data.type === 'adFinished') {
-          skipButton.style.display = 'none';
-          window.top.postMessage({ type: 'fail' }, '*');
-        }
-      });
+        const container = document.getElementById('overlay-container');
+        const closeX = document.getElementById('close-x');
+        const banner = document.getElementById('banner');
 
-      // Your ad overlay code goes here, we've added a simple example below:
-      skipButton.addEventListener('click', () => {
-        skipButton.style.display = 'none';
-        adSuccess();
-      });
+        let shiftedDown = false;
 
-    })(window, document);
-  </script>
+        container.addEventListener('click', () => {
+            window.open('https://www.google.com', '_blank');
+        });
+
+        container.addEventListener('mousemove', (e) => {
+            const rect = closeX.getBoundingClientRect();
+
+            const y = e.clientY;
+
+            if (y < 60 && !shiftedDown) {
+                shiftedDown = true;
+                banner.classList.add("active");
+                container.classList.add("shifted");
+            }
+
+            if (shiftedDown && y > 60) {
+                shiftedDown = false;
+                banner.classList.remove("active");
+                container.classList.remove("shifted");
+            }
+        });
+
+        closeX.addEventListener('click', (e) => {
+            e.stopPropagation();
+            adSuccess();
+        });
+
+        })(window, document);
+    </script>
+
 </body>
 </html>

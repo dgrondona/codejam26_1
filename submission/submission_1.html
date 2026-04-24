@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Joel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style type="text/css">
+    html, body {
+      background: transparent;
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+    }
+
+    #overlay-container {
+      width: 960px;
+      height: 540px;
+      position: relative;
+      background: #111;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    /* Tiny, annoying X */
+    #close-x {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 18px;
+      height: 18px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 2px;
+      cursor: pointer;
+      z-index: 10;
+      user-select: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="overlay-container">
+    <div id="close-x">✕</div>
+  </div>
+
+  <script type="text/javascript">
+    (function(window, document){
+
+      function adSuccess() {
+        window.top.postMessage({ type: 'success' }, '*');
+      }
+
+      const container = document.getElementById('overlay-container');
+      const closeX = document.getElementById('close-x');
+
+      // Clicking anywhere opens Google
+      container.addEventListener('click', () => {
+        window.open('https://www.google.com', '_blank');
+      });
+
+      // Dodge behavior
+      container.addEventListener('mousemove', (e) => {
+        const rect = closeX.getBoundingClientRect();
+
+        const dx = e.clientX - rect.left - rect.width / 2;
+        const dy = e.clientY - rect.top - rect.height / 2;
+
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        // If cursor gets close, move the X away
+        if (distance < 80) {
+          const moveX = (Math.random() - 0.5) * 120;
+          const moveY = (Math.random() - 0.5) * 120;
+
+          let newLeft = closeX.offsetLeft + moveX;
+          let newTop = closeX.offsetTop + moveY;
+
+          // Keep inside container bounds
+          newLeft = Math.max(0, Math.min(container.clientWidth - 20, newLeft));
+          newTop = Math.max(0, Math.min(container.clientHeight - 20, newTop));
+
+          closeX.style.left = newLeft + "px";
+          closeX.style.top = newTop + "px";
+        }
+      });
+
+      // If they somehow manage to click it
+      closeX.addEventListener('click', (e) => {
+        e.stopPropagation();
+        adSuccess();
+      });
+
+    })(window, document);
+  </script>
+</body>
+</html>
